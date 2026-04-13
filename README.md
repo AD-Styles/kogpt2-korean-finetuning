@@ -26,14 +26,15 @@
 
 ## 📂 프로젝트 구조 (Project Structure)
 ```plaintext
-📂 gpt2-korean-finetuning
+📂 kogpt2-korean-finetuning
 ├── 📄 main_finetuning.py        # 모델 학습 및 토크나이저 최적화 스크립트 (핵심 로직)
 ├── 📄 app.py                    # 학습된 모델을 시연할 수 있는 Gradio 웹 인터페이스
 ├── 📄 requirements.txt          # 프로젝트 의존성 패키지 리스트
 ├── 📄 README.md                 # 프로젝트 개요 및 결과 보고서
 ├── 📄 training.log              # 학습 과정 및 지표 모니터링 로그
-└── 📁 gpt2-korean-finetuned/    # 파인튜닝 완료된 모델 (model.safetensors) 저장소
+└── 📁 kogpt2-korean-finetuned/  # 파인튜닝 완료된 모델 (model.safetensors) 저장소
 ```
+
 
 ---
 
