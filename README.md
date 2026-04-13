@@ -1,36 +1,38 @@
-# Optimizing Korean Text Generation via GPT-2 Fine-tuning and Decoding Strategy Analysis
-### GPT-2 한국어 파인튜닝과 디코딩 전략 분석을 통한 문장 생성 최적화
+# KoGPT2 Model Fine-tuning: Optimizing Korean Text Generation and Decoding Strategies
+### 한국어 영화 리뷰 생성에 특화된 KoGPT2 파인튜닝 및 트러블슈팅 사례 연구
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)
-![Transformers](https://img.shields.io/badge/Transformers-Latest-orange.svg)
 ![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-yellow.svg)
+![Transformers](https://img.shields.io/badge/Transformers-Latest-orange.svg)
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/AD-Styles)
 
 ## 📌 프로젝트 요약 (Project Overview)
-본 프로젝트는 영어 기반의 범용 언어 모델인 **GPT-2**를 활용하여 한국어 도메인(영화 리뷰)에 특화된 텍스트 생성 파이프라인을 구축한 실습 기록입니다. Hugging Face의 Transformers와 Datasets 라이브러리를 통해 데이터 전처리부터 모델 학습까지의 전 과정을 모듈화하여 구현했습니다. 특히 학습 효율을 위해 30,000건의 데이터를 활용한 최적화된 파인튜닝을 수행했으며, 출력 제어 메커니즘인 디코딩 전략을 실습에 적용했습니다.
+본 프로젝트는 언어의 장벽을 뛰어넘기 위한 실습으로, 단순 영문 텍스트 생성 혹은 어색한 직역체 문장을 내뱉던 **기본 언어 모델의 한계를 극복**하고 **명확한 한국어 도메인(영화 리뷰)에 특화된 텍스트 생성 파이프라인**을 구축한 기록입니다. SKT의 사전 학습 한국어 모델인 **KoGPT2(`skt/kogpt2-base-v2`)** 베이스라인에 NSMC 데이터를 파인튜닝하여, 기존 일반 GPT 모델 대비 **압도적으로 향상된 한국어 표현력과 도메인 이해도**를 이끌어내는 전 과정을 다룹니다.
+
+특히, 토크나이저(Tokenizer) 로드 방식 차이로 인해 발생할 수 있는 내부 인덱스 어긋남 현상(CUDA Assert Error 및 한글 인코딩 깨짐 현상)의 치명적인 원인을 분석하고 이를 구조적으로 완벽히 해결하는 트러블슈팅 경험을 중점적으로 보여줍니다.
 
 ---
 
 ## 🎯 핵심 목표 (Motivation)
 | 구분 | 세부 내용 |
 | :--- | :--- |
-| **Tokenizer 효율 분석** | BPE 기반의 GPT-2 토크나이저가 한국어 처리 시 발생하는 토큰 팽창 문제를 진단하고 효율적인 시퀀스 처리 방안 모색 |
-| **도메인 특화 Fine-tuning** | 사전 학습된 언어 모델에 NSMC(네이버 영화 리뷰) 데이터를 주입하여 문맥에 맞는 한국어 문장을 생성하는 Causal LM 학습 구현 |
-| **디코딩 전략 최적화** | 생성 파라미터(Temperature, Top-p, Top-k) 실험을 통해 텍스트의 창의성과 일관성 사이의 Trade-off 관계 분석 및 최적값 도출 |
+| **성능 극대화 (Base vs Fine-tuned)** | 범용 지식만 가진 Base 모델의 어색한 직역체나 외계어 출력을 극복하고, 영화 리뷰 분야에서 압도적인 구어체 생성을 구사하도록 모델 지능을 업그레이드. |
+| **도메인 특화 Fine-tuning** | 일반적인 한국어 모델(KoGPT2)에 NSMC(네이버 영화 리뷰) 데이터를 주입하여 구어체 중심의 자연스러운 영화 리뷰 문맥을 생성하도록 Causal LM을 재학습. |
+| **Tokenizer 무결성 확보** | 한국어 자연어 처리 모델에서 빈번히 발생하는 토큰 인덱스 불일치 및 한글 깨짐 문제를 디버깅하고 완벽한 인코딩 규격 확립. |
+| **디코딩 전략 최적화** | 생성 파라미터(Temperature, Top-p, Repetition Penalty 등) 튜닝을 통해 텍스트의 창의성과 일관성 제어, 반복 생성 문제 억제 등. |
 
 ---
 
 ## 📂 프로젝트 구조 (Project Structure)
 ```plaintext
 📂 gpt2-korean-finetuning
-├── 📄 .gitignore                # Git 관리 제외 설정 파일
-├── 📄 LICENSE                   # MIT 라이선스 파일
-├── 📄 README.md                 # 프로젝트 개요 및 결과 보고서
-├── 📄 main_finetuning.py        # 모듈화된 파인튜닝 스크립트 (핵심 로직)
+├── 📄 main_finetuning.py        # 모델 학습 및 토크나이저 최적화 스크립트 (핵심 로직)
+├── 📄 app.py                    # 학습된 모델을 시연할 수 있는 Gradio 웹 인터페이스
 ├── 📄 requirements.txt          # 프로젝트 의존성 패키지 리스트
-├── 📄 training.log              # 학습 과정 및 지표 실시간 기록 로그
-└── 📁 gpt2-korean-finetuned/    # 파인튜닝이 완료된 모델 및 토크나이저 가중치
+├── 📄 README.md                 # 프로젝트 개요 및 결과 보고서
+├── 📄 training.log              # 학습 과정 및 지표 모니터링 로그
+└── 📁 gpt2-korean-finetuned/    # 파인튜닝 완료된 모델 (model.safetensors) 저장소
 ```
 
 ---
@@ -38,62 +40,86 @@
 ## 🛠️ 주요 알고리즘 및 기술적 구현 (Technical Implementation)
 
 ### 1. Tokenization & Data Preprocessing
-| 구현 단계 | 활용 모듈 및 파라미터 | 기술적 포인트 |
-| :--- | :--- | :--- |
-| **Tokenizer 비교** | `AutoTokenizer` (gpt2) | 영어 중심 모델의 한국어 토큰화 비용 확인 및 `pad_token` 수동 설정 |
-| **Dataset Clean-up** | `.filter()`, `.shuffle()` | 결측치 제거 및 실습 효율을 위한 Train(30k), Eval(3k) 데이터 샘플링 구축 |
-| **Causal LM Format** | `labels = input_ids.copy()` | 다음 단어 예측 학습을 위해 입력값과 정답값을 동일하게 구성하는 전처리 적용 |
+*   **정밀한 토크나이징 제어**: 일반적인 `AutoTokenizer` 대신 `PreTrainedTokenizerFast`를 명시하여 기본 토크나이저 설정이 라이브러리의 범용 로직에 의해 변형되는 것을 차단했습니다.
+*   **Data Pipelining**: `datasets` 라이브러리를 활용하여 원본 NSMC 데이터를 필터링하고 병렬로 tokenize 처리, `labels = input_ids` 복제를 통해 Causal LM 학습 포맷 구성.
 
 ### 2. Causal LM Fine-tuning Architecture
-| 프로세스 순서 | 활용 모듈 | 수행 내용 |
-| :--- | :--- | :--- |
-| **1. Model Loading** | `AutoModelForCausalLM` | 사전 학습된 GPT-2 가운치를 로드하고 파라미터 수 및 모델 크기 분석 |
-| **2. Trainer Config** | `TrainingArguments` | `num_train_epochs=1`, `learning_rate=5e-5` 등 로컬 환경 최적화 설정 |
-| **3. Optimization** | `fp16=True`, `grad_accum` | Mixed Precision과 Gradient Accumulation(4회)을 활용한 GPU 자원 최적화 |
+*   **자원 효율적 학습 설정**: 15만 건의 원본 데이터를 3만 건(Train), 3천 건(Eval)으로 샘플링하고 `gradient_accumulation_steps=2`, Mixed Precision(`fp16=True`)을 적용하여 로컬 GPU 환경에서 속도 대비 최적의 품질을 유지.
+*   **가중치 편향 구조 개편 (Weight Optimization)**: 기존 위키백과/뉴스 기사 위주로 편향되어 있던 원본 Base 모델의 가중치를 영화 리뷰 특유의 감성, 속어, 인터넷 구어체 텍스트로 강하게 재배치하여 뚜렷한 질적 수준의 성능 차별화 달성.
+*   **Trainer API Integration**: Hugging Face `Trainer`와 `DataCollatorForLanguageModeling`을 활용한 모듈화된 자동 학습 파이프라인.
 
 ### 3. Generation Decoding Strategy Analysis
-| 파라미터 | 제어 목적 | 기술적 의미 설명 |
-| :--- | :--- | :--- |
-| **Temperature** | 확률 분포 조절 | 낮은 값은 보수적, 높은 값은 창의적인(탐색적) 답변 생성 유도 |
-| **Top-p (Nucleus)** | 누적 확률 필터링 | 상위 P% 내의 단어 후보군만 고려하여 문맥적 일관성 유지 |
-| **Penalty** | `repetition_penalty` | 동일 문구 반복을 억제하여 문장 품질 향상 (본 프로젝트 1.2 적용) |
+*   **Repetition Penalty (1.2)**: 텍스트 생성 모델의 고질적인 단어/구절 무한 반복 문제를 제어하기 위해 확률 페널티 부여.
+*   **Top-P (Nucleus Sampling 0.9)**: 확률 분포 하위 10%의 연관성 없는 단어를 잘라내어 문맥이 파괴되는 것을 예방.
+*   **Temperature (0.8)**: 안전함과 창의성 간의 밸런스가 맞는 값을 채택하여 영화 리뷰 특유의 감성적 표현력 확보.
 
 ---
 
-## 🚀 트러블슈팅 및 성능 최적화 (Troubleshooting & Optimization)
-*   **학습 데이터 불균형 및 속도 이슈**: 15만 건의 전체 데이터 학습 시 발생하는 과도한 시간 소요를 해결하기 위해 3만 건의 유의미한 샘플링을 수행하고 1 Epoch로 최적화했습니다.
-*   **패딩 토큰 에러**: GPT-2 모델에 기본 `pad_token`이 없는 문제를 해결하기 위해 `eos_token`을 패딩 토큰으로 매핑하여 전처리 에러를 방지했습니다.
-*   **생성 품질 저하**: 파인튜닝 후 나타나는 무의미한 반복 생성을 `no_repeat_ngram_size=3` 설정을 통해 제어했습니다.
+## 🚀 결정적 트러블슈팅 사례 (Crucial Troubleshooting)
+
+이 프로젝트에서 겪은 가장 고무적인 문제 해결 사례입니다:
+
+> **[문제 현상] 한글 인코딩 파괴 및 `CUDA device-side assert triggered` 에러**
+> KoGPT2 모델 파인튜닝 중 지속적인 CUDA 메모리 참조 에러가 발생하였으며, 간헐적으로 출력이 외계어(깨진 한글)로 붕괴되는 현상을 발견했습니다.
+> 
+> **[원인 분석 (Root Cause)] "단 1개의 토큰이 부른 참사"**
+> 허깅페이스의 범용 클래스인 `AutoTokenizer`가 KoGPT2를 초기화하는 과정에서 기본 어휘 사전 크기인 `51,200`을 넘어 패딩 처리를 위해 새로운 토큰을 암시적으로 추가, 임베딩 크기를 `51,201`로 변형시켰습니다.
+> 모델 학습 시 이 1개의 오프로드(Off-load)가 전체 인덱스 맵핑을 1칸씩 밀리게 만들었고, 모델은 정상적인 한국어 벡터를 내보냈으나 토크나이저가 이를 잘못된 글자로 강제 디코드하여 한글이 붕괴되는 원인이 되었습니다.
+> 
+> **[해결 방안 (The True Fix)]**
+> 파생 토큰을 방지하기 위해 `PreTrainedTokenizerFast`를 구체적으로 명시 선언하고, `bos_token`, `eos_token`, `pad_token` 등을 본래 KoGPT2 체계에 맞게 하드코딩 방식으로 고정했습니다. 강제로 수행되던 불필요한 `model.resize_token_embeddings()`를 해제시켜 원래 모델 구조(Vocab 크기 51,200)에 100% 종속되도록 코드를 재구성한 후, 무결점의 한국어 출력을 확보했습니다.
 
 ---
 
-## 📊 학습 개념의 직관적 해석 (Analogies)
-| 핵심 개념 | 비유 (Analogy) | 기술적 의미 설명 |
-| :--- | :--- | :--- |
-| **Fine-tuning** | **전공 심화 학습** | 기초 상식(Pre-training)이 있는 AI에게 특정 분야(영화 리뷰)의 전문 지식을 교육 |
-| **Temperature** | **성격 조절기** | 0에 가까우면 신중하고 보수적인 성격, 2에 가까우면 모험적이고 자유로운 성격 |
-| **Tokenization** | **퍼즐 조각 내기** | 문장을 모델이 처리하기 가장 좋은 단위의 조각(토큰)으로 쪼개어 번호 부여 |
+## 🤖 파인튜닝 결과물 대조 (Inference Comparison)
+
+파인튜닝 전, 일반적인 영어 기반의 GPT-2 모델과 우리가 한국어 영화 리뷰로 목적 지향적 학습을 거친 **KoGPT2-Finetuned 모델**의 답변 차이입니다:
+
+#### Test Case 1.
+*   **Prompt**: `"배우의 연기가"`
+*   **Before (English Base GPT)**: *(무의미한 한자 및 외계어 나열, 인코딩 붕괴 상태 발생)*
+*   **After (Fine-tuned KoGPT2)**: *"배우의 연기가 더 좋았습니다.. 특히 연기가 너무 잘 어울렸어요. 영화도 이쁘고.. 연기하는게 정말 좋아요!!! 그리고 ᄒᄒᄒ!!♥♥♥♡ 짱!!~!!"*
+
+#### Test Case 2.
+*   **Prompt**: `"이 영화의 결말은"`
+*   **After (Fine-tuned KoGPT2)**: *"이 영화의 결말은 재밋게 봤는데..아니 그걸 영화라고??;;;그냥 볼거리.그리고 주인공과 같이 살수도 없는거다..나쁜 여자들이랑 함께하는 장면은 너무 실망스럽다 진짜...뭐여?; 아휴 개연성도 없고...;"*
+
+**💡 결과 해석**: 리뷰 데이터 특유의 인터넷 속어(ᄒᄒᄒ), 이모티콘(♥♥♥, ;;;), 그리고 영화 리뷰 데이터의 전형적인 구어체 문맥이 모델에 완벽하게 흡수된 것을 확인할 수 있습니다. 인코딩 에러를 완벽하게 통제하였습니다.
 
 ---
 
-## 🤖 최종 생성 결과 (Inference Results)
+## 🛠️ 실행 및 배포 (How to Run)
 
-### Before vs After Comparison
-*   **Prompt**: "오늘 본 영화는"
-*   **Before (Original GPT-2)**: "is a very important part of our life..." (영어 위주 생성)
-*   **After (Fine-tuned)**: "오늘 본 영화는 정말 감동적이었습니다. 배우들의 연기가 인상 깊었네요." (한국어 도메인 적응 완료)
+### 1단계: 패키지 의존성 설치
+본 환경 구동에 필요한 라이브러리를 설치합니다.
+```bash
+pip install -r requirements.txt
+```
+
+### 2단계: 파인튜닝 실행 (옵션)
+직접 30,000건의 NSMC 리뷰 데이터를 새로 학습해보고 싶다면 아래 명령어를 사용합니다. (GPU 권장)
+```bash
+python main_finetuning.py
+```
+
+### 3단계: 로컬 테스트 및 웹 데모 추론
+파인튜닝이 완료된 가중치 파라미터를 브라우저 UI에서 실시간으로 테스트해 볼 수 있습니다.
+```bash
+python app.py
+```
+> 터미널에 출력되는 `http://127.0.0.1:7860/` 링크로 접속하여 프롬프트를 자유롭게 입력해보세요!
+
+### 4단계: Hugging Face Spaces 완전 배포
+로컬 환경을 넘어 전 세계 누구나 사용할 수 있도록 Hugging Face Space에 모델과 앱을 원터치로 클라우드 배포합니다.
+```bash
+python deploy_space.py
+```
+> 스크립트 실행 후 CLI 인터페이스에서 `Write` 권한이 있는 Hugging Face 토큰과 원하는 Space 주소(예: `username/KoGPT2-Review-Generator`)를 입력하면 방금 파인튜닝한 최상급 한국어 모델이 스페이스에 완벽하게 박제됩니다!
 
 ---
 
-## 🛠️ 재현성 및 모델 공유 (Reproducibility & Model Sharing)
-본 프로젝트는 결과물의 공유와 재현성을 중요하게 생각합니다.
-*   **모델 사용 (Model Usage)**: 본 모델은 `main_finetuning.py`를 통해 직접 학습할 수도 있고, 허깅페이스 스페이스에서 바로 테스트 및 불러오기가 가능합니다.
-*   **환경 재현 (Environment)**: `requirements.txt`를 통해 동일한 라이브러리 환경을 구축할 수 있습니다.
-*   **가중치 관리 (Model Weights)**: 대용량 모델 파일(`model.safetensors`)은 리포지토리의 경량화를 위해 허깅페이스 외부 저장소에서 관리하며, 링크를 통해 데모를 시연합니다.
+## 💡 회고 (Retrospective)
+이 실습을 통해 언어 모델의 근간이 되는 '토크나이저'가 얼마나 민감한 부품인지 체감할 수 있었습니다. 특히, 단순히 라이브러리의 경고 메시지를 숨기거나 API를 끌어다 쓰는 수준을 넘어 **내부의 행렬 크기(Vocabulary Size) 통제 구조와 Tokenizer 인덱싱 과정**을 깊숙이 파헤치고, 트러블슈팅의 핵심 원리를 관통해낸 경험은 일반적인 튜토리얼에서는 결코 얻을 수 없는 인사이트였습니다.
+단순한 텍스트 훈련을 넘어서, 인공지능이 데이터를 다루는 '바이트와 인덱스 로직' 자체의 지배력을 기르게 된 뜻깊은 포트폴리오로 자리매김했습니다.
 
----
-
-## 💡 회고록 (Retrospective)
-  이번 프로젝트를 통해 사전 학습된 모델을 특정 언어와 도메인에 적응시키는 **전이 학습(Transfer Learning)**의 강력함을 실감했습니다. 특히 단순히 학습을 마치는 것이 아니라, 사용자 환경에 맞춰 데이터 규모를 유연하게 조정(Sampling)하고 최적의 학습 효율을 찾아내는 과정이 실무 현장에서 얼마나 중요한지 깨달았습니다.
-
-  가장 흥미로웠던 지점은 생성 파라미터 조정에 따른 모델의 '태도 변화'였습니다. temperature 값을 통해 창의성과 일관성 사이의 균형점을 찾는 과정은 모델의 기술적 이해를 넘어 데이터 엔지니어로서의 감각을 기르는 데 큰 도움이 되었습니다. 이번 실습을 기반으로 향후에는 효율적인 학습 기법인 **LoRA(Low-Rank Adaptation)** 등을 추가로 연구하여 대규모 모델 최적화 역량을 확장하고자 합니다.
+  무엇보다 가장 큰 성과는 **모델의 성능 변화를 시각적, 정성적으로 바로 체감할 수 있었다**는 점입니다. 단순 영문을 나열하거나 엉뚱한 뉴스 문맥을 읊던 Base 언어 모델이, 파인튜닝을 거친 후 영화에 대한 인간의 감정을 그대로 모방한 한국어 문장을 술술 뱉어내는 것을 보며 **'양질의 도메인 특화 데이터가 텍스트 생성 품질에 미치는 압도적 폭발력'**을 증명해낼 수 있었습니다. 
