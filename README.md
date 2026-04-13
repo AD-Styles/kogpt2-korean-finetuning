@@ -5,7 +5,10 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)
 ![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-yellow.svg)
 ![Transformers](https://img.shields.io/badge/Transformers-Latest-orange.svg)
-[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/AD-Styles)
+
+---
+
+
 
 ## 📌 프로젝트 요약 (Project Overview)
 본 프로젝트는 언어의 장벽을 뛰어넘기 위한 실습으로, 단순 영문 텍스트 생성 혹은 어색한 직역체 문장을 내뱉던 **기본 언어 모델의 한계를 극복**하고 **명확한 한국어 도메인(영화 리뷰)에 특화된 텍스트 생성 파이프라인**을 구축한 기록입니다. SKT의 사전 학습 한국어 모델인 **KoGPT2(`skt/kogpt2-base-v2`)** 베이스라인에 NSMC 데이터를 파인튜닝하여, 기존 일반 GPT 모델 대비 **압도적으로 향상된 한국어 표현력과 도메인 이해도**를 이끌어내는 전 과정을 다룹니다.
@@ -69,6 +72,13 @@
 > 
 > **[해결 방안 (The True Fix)]**
 > 파생 토큰을 방지하기 위해 `PreTrainedTokenizerFast`를 구체적으로 명시 선언하고, `bos_token`, `eos_token`, `pad_token` 등을 본래 KoGPT2 체계에 맞게 하드코딩 방식으로 고정했습니다. 강제로 수행되던 불필요한 `model.resize_token_embeddings()`를 해제시켜 원래 모델 구조(Vocab 크기 51,200)에 100% 종속되도록 코드를 재구성한 후, 무결점의 한국어 출력을 확보했습니다.
+
+---
+
+## 🔥 **[LIVE DEMO] 방금 탄생한 가장 완벽한 한글 영화 리뷰 생성기를 직접 체험해보세요!**
+[![Test in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/deploy-to-spaces-lg-dark.svg)](https://huggingface.co/spaces/AD-Styles/kogpt2-korean-finetuning)
+> **☝️ 위 버튼을 클릭하시면, 어휘 사전 인덱스까지 완벽하게 최적화된 파인튜닝 모델이 실제 가동 중인 Hugging Face 웹 서버로 즉시 연결됩니다.**
+> **URL**: [https://huggingface.co/spaces/AD-Styles/kogpt2-korean-finetuning](https://huggingface.co/spaces/AD-Styles/kogpt2-korean-finetuning)
 
 ---
 
