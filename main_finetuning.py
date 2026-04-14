@@ -1,7 +1,5 @@
 """
 KoGPT2 기반 한국어 영화 리뷰 데이터셋 파인튜닝 (성능 최적화 및 품질 개선 버전)
-Author: Antigravity (AI Assistant)
-Date: 2026-04-13
 """
 
 import logging
