@@ -28,8 +28,8 @@
 ├── 📄 .gitignore
 ├── 📄 LICENSE
 ├── 📄 README.md             # 프로젝트 기술 보고서 및 트러블슈팅 기록
-├── 📄 main_finetuning.py    # KoGPT2 파인튜닝 및 토크나이저 최적화 핵심 로직
 ├── 📄 app.py                # Gradio 기반 인터랙티브 웹 데모 실행 스크립트
+├── 📄 main_finetuning.py    # KoGPT2 파인튜닝 및 토크나이저 최적화 핵심 로직
 └── 📄 requirements.txt      # 프로젝트 환경 재현을 위한 의존성 패키지 목록
 ```
 
