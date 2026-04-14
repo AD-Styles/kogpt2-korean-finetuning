@@ -41,8 +41,8 @@
 ## 🛠️ 주요 알고리즘 및 기술적 구현 (Technical Implementation)
 
 ### 1. Tokenization & Data Preprocessing
-* **정밀한 토크나이징 제어**: 일반적인 `AutoTokenizer` 대신 `PreTrainedTokenizerFast`를 명시하여 기본 토크나이저 설정이 라이브러리의 범용 로직에 의해 변형되는 것을 차단했습니다.
-* **Data Pipelining**: `datasets` 라이브러리를 활용하여 원본 NSMC 데이터를 필터링하고 병렬로 Tokenize 처리하여 Causal LM 학습 포맷을 구성했습니다.
+* **정밀한 토크나이징 제어**: 일반적인 `AutoTokenizer` 대신 `PreTrainedTokenizerFast`를 명시하여 기본 토크나이저 설정이 라이브러리의 범용 로직에 의해 변형되는 것을 차단
+* **Data Pipelining**: `datasets` 라이브러리를 활용하여 원본 NSMC 데이터를 필터링하고 병렬로 Tokenize 처리하여 Causal LM 학습 포맷을 구성
 
 ### 2. Causal LM Fine-tuning Architecture
 * **자원 효율적 학습 설정**: 원본 데이터를 3만 건(Train), 3천 건(Eval)으로 샘플링하고 `gradient_accumulation_steps=2`, Mixed Precision(`fp16=True`)을 적용하여 GPU 환경에서 학습 효율을 극대화했습니다.
