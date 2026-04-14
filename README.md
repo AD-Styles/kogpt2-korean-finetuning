@@ -1,5 +1,5 @@
-# 🚀 Beyond English GPT-2: Fine-Tuning KoGPT2 for Korean Movie Reviews
-### 영문 GPT-2의 한계를 넘어: KoGPT2 파인튜닝과 토크나이저 무결성 확보 사례 연구
+# 🚀 Beyond Base Models: Fine-Tuning KoGPT2 for Korean Movie Reviews
+### 범용 모델의 한계를 넘어: KoGPT2 파인튜닝과 토크나이저 무결성 확보 사례 연구
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)
@@ -9,31 +9,31 @@
 ---
 
 ## 📌 프로젝트 요약 (Project Overview)
-본 프로젝트는 언어의 장벽을 뛰어넘기 위한 실습으로, 단순 영문 텍스트 생성 혹은 어색한 직역체 문장을 내뱉던 **기본 언어 모델의 한계를 극복**하고 **명확한 한국어 도메인(영화 리뷰)에 특화된 텍스트 생성 파이프라인**을 구축한 기록입니다. SKT의 사전 학습 한국어 모델인 **KoGPT2(`skt/kogpt2-base-v2`)** 베이스라인에 NSMC 데이터를 파인튜닝하여, 기존 일반 GPT 모델 대비 **압도적으로 향상된 한국어 표현력과 도메인 이해도**를 이끌어내는 전 과정을 다룹니다.
+본 프로젝트는 단순 범용 텍스트 생성 혹은 어색한 직역체 문장을 내뱉던 **기본 언어 모델의 한계를 극복**하고, **한국어 영화 리뷰 도메인에 특화된 텍스트 생성 파이프라인**을 구축한 사례입니다. SKT의 사전 학습 한국어 모델인 **KoGPT2(`skt/kogpt2-base-v2`)** 베이스라인에 NSMC 데이터를 파인튜닝하여, 기존 모델 대비 **자연스러운 구어체 표현력과 도메인 이해도**를 대폭 향상시켰습니다.
 
-특히, 토크나이저(Tokenizer) 로드 방식 차이로 인해 발생할 수 있는 내부 인덱스 어긋남 현상(CUDA Assert Error 및 한글 인코딩 깨짐 현상)의 치명적인 원인을 분석하고 이를 구조적으로 완벽히 해결하는 트러블슈팅 경험을 중점적으로 보여줍니다.
+특히, 토크나이저(Tokenizer) 로드 방식 차이로 인해 발생하는 내부 인덱스 어긋남 현상(CUDA Assert Error 및 한글 인코딩 깨짐)의 원인을 분석하고, 이를 구조적으로 해결하는 트러블슈팅 과정을 중점적으로 다룹니다.
 
 ---
 
 ## 🎯 핵심 목표 (Motivation)
 | 구분 | 세부 내용 |
 | :--- | :--- |
-| **성능 극대화 (Base vs Fine-tuned)** | 범용 지식만 가진 Base 모델의 어색한 직역체나 외계어 출력을 극복하고, 영화 리뷰 분야에서 압도적인 구어체 생성을 구사하도록 모델 지능을 업그레이드. |
-| **도메인 특화 Fine-tuning** | 일반적인 한국어 모델(KoGPT2)에 NSMC(네이버 영화 리뷰) 데이터를 주입하여 구어체 중심의 자연스러운 영화 리뷰 문맥을 생성하도록 Causal LM을 재학습. |
-| **Tokenizer 무결성 확보** | 한국어 자연어 처리 모델에서 빈번히 발생하는 토큰 인덱스 불일치 및 한글 깨짐 문제를 디버깅하고 완벽한 인코딩 규격 확립. |
-| **디코딩 전략 최적화** | 생성 파라미터(Temperature, Top-p, Repetition Penalty 등) 튜닝을 통해 텍스트의 창의성과 일관성 제어, 반복 생성 문제 억제 등. |
+| **성능 극대화** | 범용 지식만 가진 Base 모델의 어색한 직역체를 극복하고, 영화 리뷰 분야에서 자연스러운 구어체 생성을 구사하도록 모델 최적화. |
+| **도메인 특화 파인튜닝** | KoGPT2 모델에 NSMC(네이버 영화 리뷰) 데이터를 주입하여 구어체 중심의 문맥을 생성하도록 Causal LM 재학습. |
+| **Tokenizer 무결성 확보** | 한국어 자연어 처리 모델에서 빈번히 발생하는 토큰 인덱스 불일치 및 한글 깨짐 문제를 디버깅하고 안정적인 인코딩 규격 확립. |
+| **디코딩 전략 최적화** | 생성 파라미터(Temperature, Top-p, Repetition Penalty) 튜닝을 통해 텍스트의 일관성 제어 및 반복 생성 억제. |
 
 ---
 
 ## 📂 프로젝트 구조 (Project Structure)
-```plaintext
+```text
 📂 kogpt2-korean-finetuning
 ├── 📄 main_finetuning.py        # 모델 학습 및 토크나이저 최적화 스크립트 (핵심 로직)
-├── 📄 app.py                    # 학습된 모델을 시연할 수 있는 Gradio 웹 인터페이스
+├── 📄 app.py                    # 학습된 모델 시연용 Gradio 웹 인터페이스
 ├── 📄 requirements.txt          # 프로젝트 의존성 패키지 리스트
 ├── 📄 README.md                 # 프로젝트 개요 및 결과 보고서
 ├── 📄 training.log              # 학습 과정 및 지표 모니터링 로그
-└── 📁 kogpt2-korean-finetuned/  # 파인튜닝 가중치 (대용량 파일로 GitHub 제외, 허깅페이스 연동)
+└── 📁 kogpt2-korean-finetuned/  # 파인튜닝 가중치 (대용량 파일, GitHub 제외 및 Hugging Face 연동)
 ```
 
 ---
