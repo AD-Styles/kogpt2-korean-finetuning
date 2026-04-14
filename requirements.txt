@@ -2,6 +2,6 @@ transformers
 datasets
 torch
 accelerate
-matplotlib
+gradio
 pandas
 numpy
